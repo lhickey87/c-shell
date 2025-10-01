@@ -1,3 +1,4 @@
+#include "builtins.h"
 #include <dirent.h>
 #include <iostream>
 #include <string>
@@ -31,8 +32,10 @@ int main(){
         } else if (*first == "ls") {
             tokens.erase(first);
             ls(tokens); 
-        }
-
+        } else if (*first == "pwd") {
+            tokens.erase(first);
+            pwdir();
+        } 
     }
     cout << std::endl;
 
@@ -40,29 +43,8 @@ int main(){
 }
 
 
-//struct dirent{
-void ls(std::vector<std::string>& vec){
-    //first define a pointer to a directory stream
-    //loop until we find the dir name? 
-    DIR* dir_stream;
-    if (vec.size() < 2){
-        dir_stream = opendir(".");
-    } else {
-        dir_stream = opendir((vec.back()).c_str());
-    }
-    struct dirent *dp;    
-    while ((dp = readdir(dir_stream)) != NULL){
-        std::cout << dp->d_name << " " << dp->d_reclen;
-        std::cout << std::endl;
-    }
-
-    if (closedir(dir_stream) == -1){
-        std::cout << "failed to close stream" << "\n";
-    }
-    
-    
-}
-
+//the biggest decision will actually be how to handle individual tokens
+// a user entering ls -l -a is the same as ls -la
 std::vector<std::string> parse_line(std::string& line){
 
     std::stringstream ss(line);
@@ -76,11 +58,3 @@ std::vector<std::string> parse_line(std::string& line){
     return tokens;
 }
 
-
-void echo(std::vector<std::string>& vec){
-    std::string ss;
-    for (std::string token: vec){
-        std::cout << token << " ";
-    }
-    std::cout << "\n";
-}
