@@ -6,10 +6,9 @@
 #include <vector>
 #include <csignal>
 #include <fstream>
+#include <filesystem>
 
-void ls(std::vector<std::string>& vec);
 std::vector<std::string> parse_line(std::string& line);
-void echo(std::vector<std::string>& vec);
 
 int main(){
 
@@ -33,8 +32,10 @@ int main(){
             tokens.erase(first);
             ls(tokens); 
         } else if (*first == "pwd") {
-            tokens.erase(first);
-            pwdir();
+            cout << "You are here" << "\n";
+            cout << std::filesystem::current_path().string() <<  "\n";
+        } else if (*first == "cd"){
+
         } 
     }
     cout << std::endl;

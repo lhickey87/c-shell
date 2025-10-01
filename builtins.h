@@ -8,6 +8,7 @@ void echo(std::vector<std::string>& tokens);
 void ls(std::vector<std::string>& tokens);
 void concat(std::vector<std::string>& tokens);
 void pwdir();
+void find(std::vector<std::string>& tokens);
 void cd(std::vector<std::string>& tokens);
 void cp(std::vector<std::string>& tokens);
 void mkdir(std::vector<std::string>& tokens);
