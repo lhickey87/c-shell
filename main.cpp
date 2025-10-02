@@ -8,13 +8,16 @@
 #include <fstream>
 #include <filesystem>
 
+using namespace std;
+namespace fs = std::filesystem;
+
 std::vector<std::string> parse_line(std::string& line);
 
 int main(){
 
     using namespace std;
     while (true) {
-        cout << "shell>";
+        cout << fs::current_path().string() << "> ";
         string line;
         if (!getline(cin, line)){
             break;
@@ -36,6 +39,9 @@ int main(){
             cout << std::filesystem::current_path().string() <<  "\n";
         } else if (*first == "cd"){
 
+        } else if (*first == "mkdir"){
+            tokens.erase(first);
+            mkdir(tokens);
         } 
     }
     cout << std::endl;
