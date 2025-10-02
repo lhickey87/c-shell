@@ -15,7 +15,6 @@ std::vector<std::string> parse_line(std::string& line);
 
 int main(){
 
-    using namespace std;
     while (true) {
         cout << fs::current_path().string() << "> ";
         string line;
@@ -25,7 +24,7 @@ int main(){
 
         vector<string> tokens = parse_line(line);
         auto first = tokens.begin();
-
+        
         if (*first == "echo"){
             tokens.erase(first);
             echo(tokens);
@@ -35,16 +34,23 @@ int main(){
             tokens.erase(first);
             ls(tokens, tokens.size()); 
         } else if (*first == "pwd") {
-            cout << "You are here" << "\n";
             cout << std::filesystem::current_path().string() <<  "\n";
         } else if (*first == "cd"){
-
+            tokens.erase(first);
+            cd(tokens);
         } else if (*first == "mkdir"){
             tokens.erase(first);
             mkdir(tokens);
-        } 
-    }
+        } else if (*first == "cat"){
+            tokens.erase(first);
+            concat(tokens);
+        } else {
+            cout << "Command: " << *first << " not recognized";
+        }
+    
     cout << std::endl;
+
+    }
 
     return 0;
 }
