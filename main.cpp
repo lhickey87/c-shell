@@ -30,7 +30,7 @@ int main(){
             break;
         } else if (*first == "ls") {
             tokens.erase(first);
-            ls(tokens); 
+            ls(tokens, tokens.size()); 
         } else if (*first == "pwd") {
             cout << "You are here" << "\n";
             cout << std::filesystem::current_path().string() <<  "\n";
