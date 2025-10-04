@@ -8,14 +8,14 @@ namespace fs = std::filesystem;
 
 
 struct Options {
-    string path;
+    vector<string> input_files;
     bool redirect = false;
-    string readFile;
     string writeFile;
 };
+
 Options handle_flags(vector<string>& tokens);
 
-
+//this is mainly what needs work, need to handle redirection
 void concat(vector<string>& tokens){
     Options cat_options = handle_flags(tokens);
     filebuf newfile;
@@ -32,7 +32,6 @@ void concat(vector<string>& tokens){
 
 
 
-//assume at first this only includes ONE file path just to be read
 Options handle_flags(vector<string>& tokens){
     Options options;    
     //in this case we need to open a file, does relative path work?
