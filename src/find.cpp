@@ -6,4 +6,7 @@ using namespace std;
 namespace fs = std::filesystem;
 
 
-void find(vector<string>& tokens){}
+void find(vector<string>& tokens){
+    cout << tokens[0] << "\n";
+    return;
+}

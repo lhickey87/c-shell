@@ -1,7 +1,7 @@
 
 CXX = g++
 
-CXXFLAGS = -std=c++17 -Wall -I src 
+CXXFLAGS = -std=c++17 -g -Wall -Wextra -pedantic -I src 
 
 TARGET = main
 

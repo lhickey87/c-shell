@@ -31,8 +31,7 @@ int main(){
         } else if (*first == "exit") {
             break;
         } else if (*first == "ls") {
-            tokens.erase(first);
-            ls(tokens, tokens.size()); 
+            ls(tokens); 
         } else if (*first == "pwd") {
             cout << std::filesystem::current_path().string() <<  "\n";
         } else if (*first == "cd"){
@@ -42,7 +41,6 @@ int main(){
             tokens.erase(first);
             mkdir(tokens);
         } else if (*first == "cat"){
-            tokens.erase(first);
             concat(tokens);
         } else {
             cout << "Command: " << *first << " not recognized";

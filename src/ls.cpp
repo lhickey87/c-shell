@@ -4,11 +4,7 @@
 
 using namespace std;
 namespace fs = std::filesystem;
-
-
-//lets say someone inputs ls -l -a
-//how might we deal with that
-// well firstly 
+ 
 struct Options {
     string path = ".";
     bool hidden = false;
@@ -16,43 +12,51 @@ struct Options {
     bool pathExists = true;
 };
 
-Options parse_options(vector<string>& tokens);
+Options parse_options(const vector<string>& tokens);
 
-void ls(std::vector<std::string>& tokens, size_t size){
-
-    Options lsoptions = parse_options(tokens); 
-
+void ls(const vector<string>& tokens) {
+    
+    Options lsoptions = parse_options(tokens);
     if (!lsoptions.pathExists){
-        cout << "ls: " << lsoptions.path << ": No such file or directory \n";
+        std::cout << "ls: " << lsoptions.path << ": No such file or directory \n";
+        return; // Exit function early
+    } 
 
-    } else {
+    const fs::path directory(lsoptions.path);
 
-        const fs::path directory(lsoptions.path);
+    if (!fs::is_directory(directory)) {
+        // Path exists but is a file (e.g., 'ls Makefile')
+        std::cout << lsoptions.path << "\n";
+        return; 
+    }
 
+    try {
         fs::directory_iterator di(directory);
         
         for (fs::directory_entry const& entry : di){
-
-            string name = entry.path().filename().string();
+            std::string name = entry.path().filename().string();
 
             if (name[0] == '.' && !lsoptions.hidden){
-                continue;
+                continue; 
             }
             
-            cout << name << "\n";
+            // For now, only output name (implement long_format later)
+            std::cout << name << "\n";
         } 
-    }     
+    } catch (const fs::filesystem_error& e) {
+        std::cerr << "ls: error accessing " << lsoptions.path << ": " << e.what() << "\n";
+    }
 }
 
-// void long_format(const fs::directory_entry& entry){
 
-// }
-
-Options parse_options(vector<string>& tokens){
-    Options lsoptions; // this should contain default values within the struct
-    for (size_t i = 0; i < tokens.size(); ++i){
-        //std::vector[] will return a reference of the type
-        const string& token = tokens[i];
+Options parse_options(const vector<string>& tokens){
+    Options lsoptions {}; // this should contain default values within the struct
+    for (size_t i = 0; i < tokens.size(); i++){
+        auto const& token = tokens[i];
+        if (token == "ls"){
+            continue;
+        } 
+        //this loop should NOT change path if we only have ls -a, or ls -l
         if (token == "-la"|| token == "-al"){
             lsoptions.hidden = true;
             lsoptions.long_format = true;
@@ -63,8 +67,8 @@ Options parse_options(vector<string>& tokens){
         } else {
             lsoptions.path = token;
             lsoptions.pathExists = fs::exists(token);
-            cout << "exists: " << lsoptions.pathExists << "\n";
         }
     }
+    
     return lsoptions;
 }
