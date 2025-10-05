@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 
 struct Options{
     bool redirect;
-}
+};
 
 void echo(vector<string>& vec){
     string ss;
