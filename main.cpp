@@ -42,7 +42,10 @@ int main(){
             mkdir(tokens);
         } else if (*first == "cat"){
             concat(tokens);
-        } else {
+        }else if (*first == "rm"){
+            tokens.erase(first);
+            rm(tokens); 
+        }else {
             cout << "Command: " << *first << " not recognized";
         }
     
