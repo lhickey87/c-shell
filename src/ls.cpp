@@ -13,6 +13,9 @@ struct Options {
 };
 
 Options parse_options(const vector<string>& tokens);
+void long_format(const fs::directory_entry& entry);
+void print_perms(std::filesystem::perms perms);
+void hidden(const std::string& name);
 
 void ls(const vector<string>& tokens) {
     
@@ -34,20 +37,57 @@ void ls(const vector<string>& tokens) {
         fs::directory_iterator di(directory);
         
         for (fs::directory_entry const& entry : di){
-            std::string name = entry.path().filename().string();
-
-            if (name[0] == '.' && !lsoptions.hidden){
-                continue; 
-            }
             
-            // For now, only output name (implement long_format later)
-            std::cout << name << "\n";
-        } 
-    } catch (const fs::filesystem_error& e) {
-        std::cerr << "ls: error accessing " << lsoptions.path << ": " << e.what() << "\n";
+            const string name = entry.path().filename().string();
+
+            if (lsoptions.long_format && lsoptions.hidden){
+
+                long_format(entry); 
+
+            } else if (lsoptions.long_format){
+
+                if (name[0]== '.'){ continue;}
+
+                long_format(entry); 
+            } else {
+                hidden(name);
+            }
+
+            } 
+        } catch (const fs::filesystem_error& e) {
+         std::cerr << "ls: error accessing " << lsoptions.path << ": " << e.what() << "\n";
     }
 }
 
+
+void hidden(const std::string& name){
+    std::cout << name << '\n';
+}
+
+void long_format(const fs::directory_entry& entry){
+    const fs::path p = entry.path();
+    try {
+        fs::file_status status = fs::status(p);
+        fs::perms file_perms = status.permissions();
+        print_perms(file_perms);
+        cout << " " << entry.path().filename().string() << "\n";
+    } catch (const fs::filesystem_error& e){
+        cerr << "Error: " << e.what() << "\n";
+    }
+}
+
+void print_perms(std::filesystem::perms p) {
+    using std::filesystem::perms;
+    std::cout << ((p & perms::owner_read) != perms::none ? 'r' : '-');
+    std::cout << ((p & perms::owner_write) != perms::none ? 'w' : '-');
+    std::cout << ((p & perms::owner_exec) != perms::none ? 'x' : '-');
+    std::cout << ((p & perms::group_read) != perms::none ? 'r' : '-');
+    std::cout << ((p & perms::group_write) != perms::none ? 'w' : '-');
+    std::cout << ((p & perms::group_exec) != perms::none ? 'x' : '-');
+    std::cout << ((p & perms::others_read) != perms::none ? 'r' : '-');
+    std::cout << ((p & perms::others_write) != perms::none ? 'w' : '-');
+    std::cout << ((p & perms::others_exec) != perms::none ? 'x' : '-');
+}
 
 Options parse_options(const vector<string>& tokens){
     Options lsoptions {}; // this should contain default values within the struct
