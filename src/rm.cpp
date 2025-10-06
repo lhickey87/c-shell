@@ -12,7 +12,7 @@ struct Options {
     vector<string> paths = {"."};
 };
 
-Options handle_tokens(const vector<string>& tokens);
+static Options handle_tokens(const vector<string>& tokens);
 
 
 void rm(const std::vector<std::string>& tokens) {
@@ -60,7 +60,7 @@ void rm(const std::vector<std::string>& tokens) {
     }
 }
 
-Options handle_tokens(const vector<string>& tokens){
+static Options handle_tokens(const vector<string>& tokens){
 
     Options options {};
     cout << "Initialized path is: " << options.paths.at(0) << "\n";

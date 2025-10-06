@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-void echo(std::vector<std::string>& tokens);
+void echo(const std::vector<std::string>& tokens);
 void ls(const std::vector<std::string>& tokens);
 void concat(const std::vector<std::string>& tokens);
 void find(std::vector<std::string>& tokens);

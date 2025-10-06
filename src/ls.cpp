@@ -12,7 +12,7 @@ struct Options {
     bool pathExists = true;
 };
 
-Options parse_options(const vector<string>& tokens);
+static Options parse_options(const vector<string>& tokens);
 void long_format(const fs::directory_entry& entry);
 void print_perms(std::filesystem::perms perms);
 void hidden(const std::string& name);
@@ -89,7 +89,7 @@ void print_perms(std::filesystem::perms p) {
     std::cout << ((p & perms::others_exec) != perms::none ? 'x' : '-');
 }
 
-Options parse_options(const vector<string>& tokens){
+static Options parse_options(const vector<string>& tokens){
     Options lsoptions {}; // this should contain default values within the struct
     for (size_t i = 0; i < tokens.size(); i++){
         auto const& token = tokens[i];

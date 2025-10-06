@@ -12,7 +12,7 @@ struct Options {
     string writeFile;
 };
 
-Options handle_flags(const vector<string>& tokens);
+static Options handle_flags(const vector<string>& tokens);
 bool fileExists(const std::string& file);
 
 void concat(const vector<string>& tokens){
@@ -57,7 +57,7 @@ bool fileExists(const std::string& file){
 }
 
 
-Options handle_flags(const vector<string>& tokens){
+static Options handle_flags(const vector<string>& tokens){
     Options options;
 
     for (size_t i = 0; i < tokens.size();i++){
