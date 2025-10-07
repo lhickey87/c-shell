@@ -4,7 +4,7 @@
 
 using namespace std;
 namespace fs = std::filesystem;
- 
+
 struct Options {
     string path = ".";
     bool hidden = false;
@@ -17,12 +17,13 @@ void long_format(const fs::directory_entry& entry);
 void print_perms(std::filesystem::perms perms);
 void hidden(const std::string& name);
 
+
 void ls(const vector<string>& tokens) {
     
     Options lsoptions = parse_options(tokens);
     if (!lsoptions.pathExists){
         std::cout << "ls: " << lsoptions.path << ": No such file or directory \n";
-        return; // Exit function early
+        return; 
     } 
 
     const fs::path directory(lsoptions.path);
@@ -55,7 +56,7 @@ void ls(const vector<string>& tokens) {
 
             } 
         } catch (const fs::filesystem_error& e) {
-         std::cerr << "ls: error accessing " << lsoptions.path << ": " << e.what() << "\n";
+        std::cerr << "ls: error accessing " << lsoptions.path << ": " << e.what() << "\n";
     }
 }
 
@@ -111,4 +112,17 @@ static Options parse_options(const vector<string>& tokens){
     }
     
     return lsoptions;
+}
+
+int main(int argc, char* argv[]){
+        std::vector<std::string> tokens;
+        //we want to 
+        for (int i =0; i<argc; ++i){
+            //need to cast
+            tokens.push_back(argv[i]);
+        }
+
+        ls(tokens);
+
+        return EXIT_SUCCESS;
 }

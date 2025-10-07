@@ -35,11 +35,10 @@ void concat(const vector<string>& tokens){
         }
 
     } else {
-        //in the case redirect is true, we must use ofstream instead of std::cout as the output 
+
         output_file.open(catOptions.writeFile, ios::out | ios::trunc);
 
         if (!output_file.is_open()){ cout << "file not open \n";}
-        //now that the file is open should change output_stream from referencing std::cout to current file
 
         output_stream = &output_file;
 
@@ -81,4 +80,17 @@ static Options handle_flags(const vector<string>& tokens){
     }
 
     return options;
+}
+
+
+int main(int argc, char* argv[]){
+
+    vector<string> tokens;
+    for (int i = 0;i < argc; ++i){
+        tokens.push_back(argv[i]);
+    }
+
+    concat(tokens);
+
+    return EXIT_SUCCESS;
 }

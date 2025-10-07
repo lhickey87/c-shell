@@ -1,29 +1,37 @@
-
 CXX = g++
+CXXFLAGS = -Wall -Wextra -std=c++17 -g
 
-CXXFLAGS = -std=c++17 -g -Wall -Wextra -pedantic -I src 
+SRC_DIR = src
 
-TARGET = main
+SHELL_EXEC = myshell
 
-SRCS = main.cpp $(wildcard src/*.cpp)
+BUILTIN_SRCS = $(SRC_DIR)/mkdir.cpp $(SRC_DIR)/cd.cpp $(SRC_DIR)/rm.cpp
+SHELL_SRC = main.cpp $(BUILTIN_SRCS)
 
-OBJS = $(SRCS:.cpp=.o)
+ALL_SRC_FILES = $(wildcard $(SRC_DIR)/*.cpp)
 
-TARGET = shell
+PIPE_SRCS = $(filter-out $(BUILTIN_SRCS), $(ALL_SRC_FILES))
 
-$(TARGET): $(OBJS)
-	echo "linking obj file: $(OBJS)"
-	$(CXX) $(OBJS) -o $(TARGET)
+PIPE_EXECS = $(PIPE_SRCS:.cpp=)
 
-# $< is the first dependency (the .cpp file)
-# $@ is the target name (the .o file)
+SHELL_OBJS = $(SHELL_SRC:.cpp=.o)
+
+all: $(SHELL_EXEC) $(PIPE_EXECS)
+
+$(SHELL_EXEC): $(SHELL_OBJS)
+	@echo "Linking shell executable..."
+	$(CXX) $(CXXFLAGS) -o $(SHELL_EXEC) $(SHELL_OBJS)
+
 %.o: %.cpp
+	@echo "Compiling $< into $@..."
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-
-all: $(TARGET)
+$(SRC_DIR)/%: $(SRC_DIR)/%.cpp
+	@echo "Building $@ executable..."
+	$(CXX) $(CXXFLAGS) -o $@ $
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(SHELL_EXEC) $(PIPE_EXECS) $(SHELL_OBJS)
+	rm -rf $(SRC_DIR)/*.dSYM *.dSYM
 
-
+.PHONY: all clean

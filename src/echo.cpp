@@ -6,7 +6,6 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-
 struct EchoOptions{
     bool redirect = false;
     std::vector<string> words;
@@ -37,7 +36,6 @@ void echo(const vector<string>& tokens){
             (*file_stream) << word << " ";
         }
 
-
     } else {
         for (const auto& word: words){
             (*file_stream) << word << " ";
@@ -47,9 +45,7 @@ void echo(const vector<string>& tokens){
 }
 
 static EchoOptions handle_tokens(const vector<string>& tokens){
-    //if redirection is found, make sure there is a next token
-    //if not return error
-    //we assume the echo command is gone, first token will be what is "echoed"
+
     EchoOptions options {};
     for (size_t i = 0; i < tokens.size(); ++i) {
         const auto& token = tokens[i];
@@ -72,6 +68,21 @@ static EchoOptions handle_tokens(const vector<string>& tokens){
     }
 
     return options;
-
 }
+
+
+
+int main(int argc, char* argv[]){
+
+    //handling tokens
+    vector<string> tokens;
+    for (int i =0; i< argc;++i){
+        tokens.push_back(argv[i]);
+    }
+
+    echo(tokens);
+
+    return EXIT_SUCCESS;
+}
+
 
