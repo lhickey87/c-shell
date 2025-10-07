@@ -47,7 +47,7 @@ void echo(const vector<string>& tokens){
 static EchoOptions handle_tokens(const vector<string>& tokens){
 
     EchoOptions options {};
-    for (size_t i = 0; i < tokens.size(); ++i) {
+    for (size_t i = 1; i < tokens.size(); ++i) {
         const auto& token = tokens[i];
 
         if (token == ">") {

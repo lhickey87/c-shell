@@ -1,4 +1,4 @@
-#include "builtins.h"
+#include "src/builtins.h"
 #include <dirent.h>
 #include <iostream>
 #include <sstream>
@@ -11,7 +11,10 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-std::vector<std::string> parse_line(std::string& line);
+
+vector<string> parse_line(string& line);
+vector<char*> to_argv(const vector<string>& args); 
+void process_command(const string& command_name, const vector<string>& args);
 
 int main(){
 
@@ -22,121 +25,69 @@ int main(){
             break;
         }
         
-        //need to turn token vector into c-style strings for exec() syscall
         vector<string> tokens = parse_line(line);
         auto first = tokens.begin();
         
-        if (*first == "echo"){
-            tokens.erase(first);
-            echo(tokens);
-        } else if (*first == "exit") {
+        if (*first == "exit") {
             break;
-        } else 
-        if (*first == "ls") {
-            //CAN BE PIPED FROM
-            //do we have to create a child process here?
-            //need to create function to handle this
-            int pid = fork();
-            if (pid < 0){cout << "error forking \n";}
-            if (pid == 0){
-                cout << "inside child process \n";
-                execl("./src/ls","ls", "-l",NULL);
-
-                perror("exec failed");
-
-                exit(EXIT_FAILURE);
-            }
-
-            int status;
-            waitpid(pid, &status, 0);
         } else if (*first == "pwd") {
-            //piping allowed
             cout << std::filesystem::current_path().string() <<  "\n";
         } else if (*first == "cd"){
-            //piping not allowed
             tokens.erase(first);
             cd(tokens);
         } else if (*first == "mkdir"){
-            //CANNOT BE USED IN PIPES
             tokens.erase(first);
             mkdir(tokens);
-        } else if (*first == "cat"){
-            concat(tokens);
         }else if (*first == "rm"){
-            //requires xargs
             tokens.erase(first);
             rm(tokens); 
         }else {
-            cout << "Command: " << *first << " not recognized";
+            cout << "syscalling external program with args \n";
+            process_command(*first, tokens);
         }
     
-    cout << std::endl;
+    cout << endl;
 
     }
 
     return 0;
 }
 
-// void pipe(std::string cmd1, std::string cmd2){
-//     int fd[2];
-//     if (pipe(fd)==-1){
-//         cout << "error happened \n";
-//         return 1;
-//     }
-
-//     //whatever called fork is the main process, this main process will be respondible for forking the first and second command
-//     //and dealing with the pipe
-//     int pid1 = fork();
-//     if (pid1 < 0){
-//         cout << "process failed to star \n";
-//         return 2;
-//     }
-
-//     if (pid1 == 0){
-//         close(fd[0]);
-//         dup2(fd[1], STDOUT_FILENO);
-//         close(fd[1]);
-//         //exec()
-//     }
-
-//     int pid2 = fork();
-//     if (pid2 < 0){
-//         cout << "process failed to star \n";
-//         return 2;
-//     }
-
-//     if (pid2 == 0){
-//         dup2(fd[0], STDIN_FILENO);
-//         close(fd[0]);
-//         close(fd[1]);
-//         //exec()
-//     }
-
-//    //finish
-// }
-void func(){
-    int pid = fork();
-    if (pid < 0){cout << "error forking \n";}
-    if (pid == 0){
-        cout << "inside child process \n";
-        execl("./src/ls","ls", "-l",NULL);
-
-        perror("exec failed");
-
-        exit(EXIT_FAILURE);
+vector<char*> to_argv(const vector<string>& args) {
+    vector<char*> argv;
+    for (auto& arg : args) {
+        argv.push_back(const_cast<char*>(arg.c_str()));
     }
-
-    int status;
-    waitpid(pid, &status,0);
+    argv.push_back(nullptr);
+    return argv;
 }
 
-//the biggest decision will actually be how to handle individual tokens
-// a user entering ls -l -a is the same as ls -la
-std::vector<std::string> parse_line(std::string& line){
+void process_command(const string& command_name, const vector<string>& args){
+    
+    auto argv = to_argv(args);
+    std::string path = "./src/" + command_name;
+    cout << path << "\n";
+    
+    pid_t pid = fork();
+    if (pid == 0) {
+        execv(path.c_str(), argv.data());
+        perror("execv failed");
+        exit(EXIT_FAILURE);
+    }
+    
+    if (pid > 0) {
+        int status;
+        waitpid(pid, &status, 0);
+    } else {
+        perror("fork failed");
+    }
+} 
 
-    std::stringstream ss(line);
-    std::vector<std::string> tokens;
-    std::string token;
+
+vector<string> parse_line(string& line){
+    stringstream ss(line);
+    vector<string> tokens;
+    string token;
 
     while (ss >> token){
         tokens.push_back(token);

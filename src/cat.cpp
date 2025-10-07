@@ -59,7 +59,7 @@ bool fileExists(const std::string& file){
 static Options handle_flags(const vector<string>& tokens){
     Options options;
 
-    for (size_t i = 0; i < tokens.size();i++){
+    for (size_t i = 1; i < tokens.size();i++){
         const string& token = tokens[i];
 
         if (token == "cat"){
