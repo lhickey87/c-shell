@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include <filesystem>
+#include <iostream>
 
 void echo(const std::vector<std::string>& tokens);
 void ls(const std::vector<std::string>& tokens);

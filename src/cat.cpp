@@ -1,6 +1,5 @@
 #include "builtins.h"
-#include <filesystem>
-#include <iostream>
+
 #include <fstream>
 
 using namespace std;
@@ -35,6 +34,7 @@ void concat(const vector<string>& tokens){
         }
 
     } else {
+        cout << "redirect True! " << "\n";
 
         output_file.open(catOptions.writeFile, ios::out | ios::trunc);
 
@@ -57,7 +57,7 @@ bool fileExists(const std::string& file){
 
 
 static Options handle_flags(const vector<string>& tokens){
-    Options options;
+    Options options {};
 
     for (size_t i = 1; i < tokens.size();i++){
         const string& token = tokens[i];

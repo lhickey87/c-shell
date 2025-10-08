@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -g
+CXXFLAGS = -Wall -Wextra -std=c++17 -g -Iinclude 
 
 # --- Shell (Built-in) Configuration ---
 SHELL_EXEC = myshell
