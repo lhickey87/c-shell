@@ -1,4 +1,8 @@
 #include "builtins.h"
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <iostream>
 
 #include <fstream>
 
@@ -85,10 +89,7 @@ static Options handle_flags(const vector<string>& tokens){
 
 int main(int argc, char* argv[]){
 
-    vector<string> tokens;
-    for (int i = 0;i < argc; ++i){
-        tokens.push_back(argv[i]);
-    }
+    vector<string> tokens(argv, argc+argv);
 
     concat(tokens);
 

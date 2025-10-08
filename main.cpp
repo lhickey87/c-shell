@@ -12,10 +12,10 @@ namespace fs = std::filesystem;
 
 
 vector<string> parse_line(string& line);
-// vector<char*> to_argv(const vector<string>& args); 
-// void process_command(const string& command_name, const vector<string>& args);
 
 int main(){
+
+    auto absolute = fs::current_path().string() + "/";
 
     while (true) {
         cout << fs::current_path().string() << "> ";
@@ -24,62 +24,30 @@ int main(){
             break;
         }
         
-        vector<string> tokens = parse_line(line);
+        const vector<string> tokens = parse_line(line);
         auto first = tokens.begin();
         
         if (*first == "exit") {
             break;
         } else if (*first == "pwd") {
-            cout << std::filesystem::current_path().string() <<  "\n";
+            cout << fs::current_path().string() <<  "\n";
         } else if (*first == "cd"){
-            tokens.erase(first);
             cd(tokens);
         } else if (*first == "mkdir"){
-            tokens.erase(first);
             mkdir(tokens);
         }else if (*first == "rm"){
-            tokens.erase(first);
             rm(tokens); 
         }else {
-            Executor::process_command(*first, tokens);
+            
+            Executor::process_command(absolute, *first, tokens);
         }
     
     cout << endl;
 
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
-
-// vector<char*> to_argv(const vector<string>& args) {
-//     vector<char*> argv;
-//     for (auto& arg : args) {
-//         argv.push_back(const_cast<char*>(arg.c_str()));
-//     }
-//     argv.push_back(nullptr);
-//     return argv;
-// }
-
-// void process_command(const string& command_name, const vector<string>& args){
-    
-//     auto argv = to_argv(args);
-//     std::string path = "./src/" + command_name;
-//     cout << path << "\n";
-    
-//     pid_t pid = fork();
-//     if (pid == 0) {
-//         execv(path.c_str(), argv.data());
-//         perror("execv failed");
-//         exit(EXIT_FAILURE);
-//     }
-    
-//     if (pid > 0) {
-//         int status;
-//         waitpid(pid,&status,0);
-//     } else {
-//         perror("fork failed");
-//     }
-// } 
 
 
 vector<string> parse_line(string& line){

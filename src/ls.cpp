@@ -1,4 +1,8 @@
 #include "builtins.h"
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <iostream>
 
 
 using namespace std;
@@ -114,15 +118,8 @@ static Options parse_options(const vector<string>& tokens){
 }
 
 int main(int argc, char* argv[]){
-        std::vector<std::string> tokens;
-        //argv contains char pointers,
-        //need to turn char* argv into vector<char*>
-        //we want to 
-        for (int i =0; i<argc; ++i){
-            //need to cast
-            tokens.push_back(argv[i]);
-        }
-
+        const vector<string> tokens(argv,argc+argv);
+        
         ls(tokens);
 
         return EXIT_SUCCESS;

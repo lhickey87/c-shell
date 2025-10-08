@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <sys/wait.h>
+#include <iostream>
 
 class Executor {
 
@@ -19,14 +20,14 @@ class Executor {
         }
 
     public:
-        static int process_command(const std::string& command_name, const std::vector<std::string>& args){ 
+        static int process_command(const std::string& path, const std::string& command_name, const std::vector<std::string>& args){ 
             auto argv = to_argv(args);
 
-            std::string path = "./src/" + command_name;
-            
+            std::string command_path = path +"/src/"+ command_name;
+
             pid_t pid = fork();
             if (pid == 0) {
-                execv(path.c_str(), argv.data());
+                execv(command_path.c_str(), argv.data());
                 perror("execv failed");
                 exit(EXIT_FAILURE);
             }

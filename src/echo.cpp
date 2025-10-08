@@ -1,4 +1,8 @@
 #include "builtins.h"
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <iostream>
 
 #include <fstream>
 
@@ -73,11 +77,7 @@ static EchoOptions handle_tokens(const vector<string>& tokens){
 
 int main(int argc, char* argv[]){
 
-    //handling tokens
-    vector<string> tokens;
-    for (int i =0; i< argc;++i){
-        tokens.push_back(argv[i]);
-    }
+    const vector<string> tokens(argv,argv+argc);
 
     echo(tokens);
 

@@ -1,4 +1,8 @@
 #include "builtins.h"
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <iostream>
 
 #include <utility>
 
@@ -14,7 +18,7 @@ struct Options {
 static Options handle_tokens(const vector<string>& tokens);
 
 
-void rm(const std::vector<std::string>& tokens) {
+void rm(const vector<string>& tokens) {
     Options opts = handle_tokens(tokens);
 
     if (opts.paths.empty()) {
@@ -67,7 +71,9 @@ static Options handle_tokens(const vector<string>& tokens){
     //how do we handle the paths now?
     for (auto const& token: tokens){
 
-        if (token == "-rf"){
+        if (token == "rm"){
+            continue;
+        } else if (token == "-rf"){
             options.f_flag = true;
             options.r_flag = true;
         } else if (token == "-r"){
@@ -75,7 +81,6 @@ static Options handle_tokens(const vector<string>& tokens){
         } else if (token == "-f"){
             options.f_flag = true;
         } else {
-            //assuming it must then be a path argument
             //now we need to create a new path's vector, then call the move assignment
             found_paths.push_back(token);
         }

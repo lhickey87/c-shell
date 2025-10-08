@@ -1,21 +1,21 @@
 #include "builtins.h"
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <iostream>
 
 
 using namespace std;
 namespace fs = std::filesystem;
 
 
-void find(vector<string>& tokens){
+void find(const vector<string>& tokens){
     cout << tokens[0] << "\n";
-    return;
 }
 
 int main(int argc, char* argv[]){
 
-    vector<string> tokens;
-    for (int i = 0;i < argc; ++i){
-        tokens.push_back(argv[i]);
-    }
+    const vector<string> tokens(argv,argv+argc);
 
     find(tokens);
 
