@@ -18,7 +18,6 @@ struct Options {
 static Options parse_options(const vector<string>& tokens);
 void long_format(const fs::directory_entry& entry);
 void print_perms(std::filesystem::perms perms);
-void hidden(const std::string& name);
 
 
 void ls(const vector<string>& tokens) {
@@ -32,15 +31,15 @@ void ls(const vector<string>& tokens) {
     const fs::path directory(lsoptions.path);
 
     if (!fs::is_directory(directory)) {
-        // Path exists but is a file (e.g., 'ls Makefile')
         std::cout << lsoptions.path << "\n";
         return; 
     }
 
     try {
         fs::directory_iterator di(directory);
-        
-        for (fs::directory_entry const& entry : di){
+       
+        //di is a directory_iterator
+        for (auto const& entry : di){
             
             const string name = entry.path().filename().string();
 
@@ -49,24 +48,19 @@ void ls(const vector<string>& tokens) {
                 long_format(entry); 
 
             } else if (lsoptions.long_format){
-
                 if (name[0]== '.'){ continue;}
-
                 long_format(entry); 
             } else {
-                hidden(name);
+                cout << name << "\n";
             }
 
-            } 
-        } catch (const fs::filesystem_error& e) {
+        } 
+    } catch (const fs::filesystem_error& e) {
         std::cerr << "ls: error accessing " << lsoptions.path << ": " << e.what() << "\n";
     }
 }
 
 
-void hidden(const std::string& name){
-    std::cout << name << '\n';
-}
 
 void long_format(const fs::directory_entry& entry){
     const fs::path p = entry.path();
@@ -80,17 +74,17 @@ void long_format(const fs::directory_entry& entry){
     }
 }
 
-void print_perms(std::filesystem::perms p) {
+void print_perms(fs::perms p) {
     using std::filesystem::perms;
-    std::cout << ((p & perms::owner_read) != perms::none ? 'r' : '-');
-    std::cout << ((p & perms::owner_write) != perms::none ? 'w' : '-');
-    std::cout << ((p & perms::owner_exec) != perms::none ? 'x' : '-');
-    std::cout << ((p & perms::group_read) != perms::none ? 'r' : '-');
-    std::cout << ((p & perms::group_write) != perms::none ? 'w' : '-');
-    std::cout << ((p & perms::group_exec) != perms::none ? 'x' : '-');
-    std::cout << ((p & perms::others_read) != perms::none ? 'r' : '-');
-    std::cout << ((p & perms::others_write) != perms::none ? 'w' : '-');
-    std::cout << ((p & perms::others_exec) != perms::none ? 'x' : '-');
+    cout << ((p & perms::owner_read) != perms::none ? 'r' : '-');
+    cout << ((p & perms::owner_write) != perms::none ? 'w' : '-');
+    cout << ((p & perms::owner_exec) != perms::none ? 'x' : '-');
+    cout << ((p & perms::group_read) != perms::none ? 'r' : '-');
+    cout << ((p & perms::group_write) != perms::none ? 'w' : '-');
+    cout << ((p & perms::group_exec) != perms::none ? 'x' : '-');
+    cout << ((p & perms::others_read) != perms::none ? 'r' : '-');
+    cout << ((p & perms::others_write) != perms::none ? 'w' : '-');
+    cout << ((p & perms::others_exec) != perms::none ? 'x' : '-');
 }
 
 static Options parse_options(const vector<string>& tokens){
@@ -100,7 +94,7 @@ static Options parse_options(const vector<string>& tokens){
         if (token == "ls"){
             continue;
         } 
-        //this loop should NOT change path if we only have ls -a, or ls -l
+        
         if (token == "-la"|| token == "-al"){
             lsoptions.hidden = true;
             lsoptions.long_format = true;
@@ -113,7 +107,6 @@ static Options parse_options(const vector<string>& tokens){
             lsoptions.pathExists = fs::exists(token);
         }
     }
-    
     return lsoptions;
 }
 

@@ -21,30 +21,25 @@ static EchoOptions handle_tokens(const vector<string>& tokens);
 void echo(const vector<string>& tokens){
     EchoOptions echo_options = handle_tokens(tokens);
 
-    //assume our file_stream is cout if redirect not true
     ostream* file_stream = &std::cout;
-    ofstream output_file; //
-    auto const& words = echo_options.words;
+    
+    std::ofstream output_file;
     if (echo_options.redirect){
+        output_file.open(echo_options.redirect_file, ios::out | ios::trunc);
         
-        output_file.open(echo_options.redirect_file, std::ios::out);
         if (!output_file.is_open()){
-
-            cout << "file not opened \n";
+            cerr << "file not opened \n";
         }
 
         file_stream = &output_file;
+    }
 
-        for (const auto& word: words){
-            (*file_stream) << word << " ";
-        }
+    for (const auto& word: echo_options.words){
+        (*file_stream) << word << " ";
+    }
 
-    } else {
-        for (const auto& word: words){
-            (*file_stream) << word << " ";
-        }
-    } 
-
+    (*file_stream) << endl;
+    
 }
 
 static EchoOptions handle_tokens(const vector<string>& tokens){
@@ -69,11 +64,8 @@ static EchoOptions handle_tokens(const vector<string>& tokens){
             options.words.push_back(token);
         }
     }
-
     return options;
 }
-
-
 
 int main(int argc, char* argv[]){
 

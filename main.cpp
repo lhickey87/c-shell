@@ -6,6 +6,7 @@
 #include <csignal>
 #include <fstream>
 #include "Executor.h"
+#include <iterator>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -50,15 +51,10 @@ int main(){
 }
 
 
-vector<string> parse_line(string& line){
-    stringstream ss(line);
-    vector<string> tokens;
-    string token;
-
-    while (ss >> token){
-        tokens.push_back(token);
-    }
+vector<string> parse_line(string& line) {
+    std::stringstream ss(line);
+    
+    vector<string> tokens{istream_iterator<string>(ss),istream_iterator<string>()};
 
     return tokens;
 }
-

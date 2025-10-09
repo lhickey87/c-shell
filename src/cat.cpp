@@ -10,7 +10,7 @@ using namespace std;
 namespace fs = std::filesystem;
 
 struct Options {
-    string input_files;
+    string inputFile;
     bool redirect = false;
     string writeFile;
 };
@@ -20,37 +20,30 @@ bool fileExists(const std::string& file);
 
 void concat(const vector<string>& tokens){
     Options catOptions = handle_flags(tokens);
-    cout << "inside function! \n"; 
 
-    const std::string& file = catOptions.input_files;
-    ifstream input_file(file);
+    ifstream inputFile(catOptions.inputFile);
 
-    std::string line;
+    if (!inputFile.is_open()){
+        cerr << "Could not open file: "<< catOptions.inputFile << "\n";   
+    } 
 
     ostream* output_stream = &std::cout;
 
     ofstream output_file; 
 
-    if (!catOptions.redirect) {
-
-        while (getline(input_file, line)){
-            cout << line << "\n";
-        }
-
-    } else {
-        cout << "redirect True! " << "\n";
-
+    if (catOptions.redirect){
         output_file.open(catOptions.writeFile, ios::out | ios::trunc);
 
-        if (!output_file.is_open()){ cout << "file not open \n";}
-
-        output_stream = &output_file;
-
-        while (getline(input_file, line)){
-            (*output_stream) << line << "\n";
+        if (!output_file.is_open()){
+            cerr << "Cat: could not open output file: " << catOptions.writeFile << "\n";
+            return;
         }
-
-        input_file.close();
+        output_stream = &output_file;
+    }
+    //now that we have outputstream decalred
+    string line;
+    while (getline(inputFile, line)){
+        (*output_stream) << line << "\n";
     }
 }
 
@@ -66,10 +59,6 @@ static Options handle_flags(const vector<string>& tokens){
     for (size_t i = 1; i < tokens.size();i++){
         const string& token = tokens[i];
 
-        if (token == "cat"){
-            continue;
-        }
-
         if (token == ">"){
             options.redirect = true;
             if (i+1 < tokens.size()){
@@ -79,7 +68,7 @@ static Options handle_flags(const vector<string>& tokens){
                 std::cerr << "No output file \n";
             }
         } else if (!options.redirect && fileExists(token)){
-            options.input_files = token;
+            options.inputFile = token;
         } 
     }
 
@@ -88,7 +77,6 @@ static Options handle_flags(const vector<string>& tokens){
 
 
 int main(int argc, char* argv[]){
-
     vector<string> tokens(argv, argc+argv);
 
     concat(tokens);
