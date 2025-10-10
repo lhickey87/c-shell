@@ -3,7 +3,7 @@
 
 using namespace std;
 
-struct Options {
+struct CatOptions {
     string inputFile;
     bool redirect = false;
     string writeFile;
@@ -11,11 +11,11 @@ struct Options {
 using OutputStream = std::ostream;
 using OutputFile = std::ofstream;
 
-static Options handle_flags(const vector<string>& tokens);
+static CatOptions handleTokens(const vector<string>& tokens);
 bool fileExists(const std::string& file);
 
 void concat(const vector<string>& tokens){
-    Options catOptions = handle_flags(tokens);
+    CatOptions catOptions = handleTokens(tokens);
 
     ifstream inputFile(catOptions.inputFile);
 
@@ -49,8 +49,8 @@ bool fileExists(const std::string& file){
 }
 
 
-static Options handle_flags(const vector<string>& tokens){
-    Options options {};
+static CatOptions handleTokens(const vector<string>& tokens){
+    CatOptions options {};
 
     for (size_t i = 1; i < tokens.size();i++){
         const string& token = tokens[i];

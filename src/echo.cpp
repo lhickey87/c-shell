@@ -13,10 +13,10 @@ struct EchoOptions{
     bool has_error = false;
 };
 
-static EchoOptions handle_tokens(const vector<string>& tokens);
+static EchoOptions handleTokens(const vector<string>& tokens);
 
 void echo(const vector<string>& tokens){
-    EchoOptions echo_options = handle_tokens(tokens);
+    EchoOptions echo_options = handleTokens(tokens);
 
     OutputStream* file_stream = &std::cout;
     
@@ -39,7 +39,7 @@ void echo(const vector<string>& tokens){
     
 }
 
-static EchoOptions handle_tokens(const vector<string>& tokens){
+static EchoOptions handleTokens(const vector<string>& tokens){
 
     EchoOptions options {};
     for (size_t i = 1; i < tokens.size(); ++i) {

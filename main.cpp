@@ -1,18 +1,17 @@
 #include "builtins.h"
+#include "Executor.h"
 #include <dirent.h>
 #include <sstream>
 #include <unistd.h>
-#include <sys/wait.h>
 #include <csignal>
 #include <fstream>
-#include "Executor.h"
 #include <iterator>
 
 using namespace std;
 namespace fs = std::filesystem;
 
 
-vector<string> parse_line(std::string& line);
+vector<string> parse_line(string& line);
 
 int main(){
 
@@ -52,7 +51,7 @@ int main(){
 
 
 vector<string> parse_line(string& line) {
-    std::stringstream ss(line);
+    stringstream ss(line);
     
     vector<string> tokens{istream_iterator<string>(ss),istream_iterator<string>()};
 

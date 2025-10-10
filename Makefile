@@ -1,25 +1,20 @@
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++17 -g -Iinclude 
 
-# --- Shell (Built-in) Configuration ---
 SHELL_EXEC = myshell
 SHELL_SRC = main.cpp src/mkdir.cpp src/cd.cpp src/rm.cpp
 SHELL_OBJS = $(SHELL_SRC:.cpp=.o)
 
-# --- Pipe Executable Configuration ---
 # Find all .cpp files in src/
 ALL_SRC = $(wildcard src/*.cpp)
 
-# Define which src files are built-ins (objects linked into the main shell)
-BUILTIN_SRCS = src/mkdir.cpp src/cd.cpp src/rm.cpp
+BUILTIN_SRCS = src/mkdir.cpp src/cd.cpp src/rm.cpp src/grep.cpp
 
-# Define which src files are external pipe executables
 PIPE_SRCS = $(filter-out $(BUILTIN_SRCS), $(ALL_SRC))
 
 # Define the names of the pipe executables (e.g., src/find, src/grep)
 PIPE_EXECS = $(PIPE_SRCS:.cpp=)
 
-# Build everything
 all: $(SHELL_EXEC) $(PIPE_EXECS)
 
 # Link main shell
@@ -30,7 +25,6 @@ $(SHELL_EXEC): $(SHELL_OBJS)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Build external pipe executables (THE FIX)
 # Target: src/find, Prerequisite: src/find.cpp
 src/%: src/%.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $<

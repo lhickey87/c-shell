@@ -13,14 +13,14 @@ struct Options {
 using Permissions = fs::perms;
 using DirectoryIter = fs::directory_iterator;
 
-static Options parse_options(const vector<string>& tokens);
+static Options handleTokens(const vector<string>& tokens);
 void long_format(const DirectoryEntry& entry);
 void print_perms(Permissions perms);
 
 
 void ls(const vector<string>& tokens) {
     
-    Options lsoptions = parse_options(tokens);
+    Options lsoptions = handleTokens(tokens);
     if (!lsoptions.pathExists){
         std::cout << "ls: " << lsoptions.path << ": No such file or directory \n";
         return; 
@@ -95,7 +95,7 @@ void print_perms(Permissions p) {
     cout << ((p & Permissions::others_exec) != Permissions::none ? 'x' : '-');
 }
 
-static Options parse_options(const vector<string>& tokens){
+static Options handleTokens(const vector<string>& tokens){
     Options lsoptions {}; // this should contain default values within the struct
     for (size_t i = 0; i < tokens.size(); i++){
         auto const& token = tokens[i];

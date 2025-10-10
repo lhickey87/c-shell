@@ -5,6 +5,9 @@
 #include "glob.h"
 
 using namespace std;
+using std::vector;
+using std::string;
+using std::map;
 
 struct Options {
     FilePath directoryPath = FilePath(".");
@@ -33,7 +36,7 @@ void handleType(Options& options, TokenIterator& it, const TokenIterator& end);
 
 void handleMaxDepth(Options& options, TokenIterator& it, const TokenIterator& end);
 
-bool FileMatches(DirectoryEntry& dirEntry, const Options& options);
+bool FileMatches(const DirectoryEntry& dirEntry, const Options& options);
 
 //this will be a hard function to implement
 //could use std::copy_if but the issue is which predicate do we use

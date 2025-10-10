@@ -5,13 +5,17 @@
 #include <string>
 #include <sys/wait.h>
 #include <iostream>
+#include <unistd.h>
+using std::string;
+using std::vector;
+
 
 class Executor {
 
     private:
-        static std::vector<char*> to_argv(const std::vector<std::string>& args) {
+        static vector<char*> to_argv(const vector<string>& args) {
             //given we are passing in a reference, what if in another function the memory is freed??
-            std::vector<char*> argv;
+            vector<char*> argv;
             //NEEDS TO BE CLEANED UP ASAP
             for (auto& arg : args) {
                 argv.push_back(const_cast<char*>(arg.c_str()));
@@ -21,10 +25,10 @@ class Executor {
         }
 
     public:
-        static int process_command(const std::string& path, const std::string& command_name, const std::vector<std::string>& args){ 
+        static int process_command(const string& path, const string& command_name, const vector<string>& args){ 
             auto argv = to_argv(args);
 
-            std::string command_path = path +"/src/"+ command_name;
+            string command_path = path +"/src/"+ command_name;
 
             pid_t pid = fork();
             if (pid == 0) {
@@ -41,7 +45,21 @@ class Executor {
             }
             return 0;
         }
+
+        /*static int process_pipeline(const string& command_name, const vector<string>& args){
+            //are all pipes, write | read optional(write)
+            int num_commands = args.size();
+            
+            for (int i = 0; i < num_commands; ++i){
+                int fd[2];
+                if (pipe(fd) == 1){
+                    std::cerr << "Issue opening pipe \n";
+                    return 1;
+                }
+            }
+        } */
 };
+
 
 
 #endif
