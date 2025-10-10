@@ -15,9 +15,14 @@ struct Options {
     bool pathExists = true;
 };
 
+using Permissions = std::filesystem::perms;
+using Path = fs::path;
+using DirEntry = fs::directory_entry;
+using DirectoryIter = fs::directory_iterator;
+
 static Options parse_options(const vector<string>& tokens);
-void long_format(const fs::directory_entry& entry);
-void print_perms(std::filesystem::perms perms);
+void long_format(const DirEntry& entry);
+void print_perms(Permissions perms);
 
 
 void ls(const vector<string>& tokens) {
@@ -28,7 +33,7 @@ void ls(const vector<string>& tokens) {
         return; 
     } 
 
-    const fs::path directory(lsoptions.path);
+    const Path directory(lsoptions.path);
 
     if (!fs::is_directory(directory)) {
         std::cout << lsoptions.path << "\n";
@@ -36,7 +41,7 @@ void ls(const vector<string>& tokens) {
     }
 
     try {
-        fs::directory_iterator di(directory);
+        DirectoryIter di(directory);
        
         //di is a directory_iterator
         for (auto const& entry : di){
@@ -49,9 +54,13 @@ void ls(const vector<string>& tokens) {
 
             } else if (lsoptions.long_format){
                 if (name[0]== '.'){ continue;}
+
                 long_format(entry); 
+                
             } else {
+
                 cout << name << "\n";
+
             }
 
         } 
@@ -62,29 +71,35 @@ void ls(const vector<string>& tokens) {
 
 
 
-void long_format(const fs::directory_entry& entry){
-    const fs::path p = entry.path();
+void long_format(const DirEntry& entry){
+    const Path p = entry.path();
     try {
+
         fs::file_status status = fs::status(p);
-        fs::perms file_perms = status.permissions();
+
+        Permissions file_perms = status.permissions();
+
         print_perms(file_perms);
+
         cout << " " << entry.path().filename().string() << "\n";
+
     } catch (const fs::filesystem_error& e){
+
         cerr << "Error: " << e.what() << "\n";
+        
     }
 }
 
-void print_perms(fs::perms p) {
-    using std::filesystem::perms;
-    cout << ((p & perms::owner_read) != perms::none ? 'r' : '-');
-    cout << ((p & perms::owner_write) != perms::none ? 'w' : '-');
-    cout << ((p & perms::owner_exec) != perms::none ? 'x' : '-');
-    cout << ((p & perms::group_read) != perms::none ? 'r' : '-');
-    cout << ((p & perms::group_write) != perms::none ? 'w' : '-');
-    cout << ((p & perms::group_exec) != perms::none ? 'x' : '-');
-    cout << ((p & perms::others_read) != perms::none ? 'r' : '-');
-    cout << ((p & perms::others_write) != perms::none ? 'w' : '-');
-    cout << ((p & perms::others_exec) != perms::none ? 'x' : '-');
+void print_perms(Permissions p) {
+    cout << ((p & Permissions::owner_read) != Permissions::none ? 'r' : '-');
+    cout << ((p & Permissions::owner_write) != Permissions::none ? 'w' : '-');
+    cout << ((p & Permissions::owner_exec) != Permissions::none ? 'x' : '-');
+    cout << ((p & Permissions::group_read) != Permissions::none ? 'r' : '-');
+    cout << ((p & Permissions::group_write) != Permissions::none ? 'w' : '-');
+    cout << ((p & Permissions::group_exec) != Permissions::none ? 'x' : '-');
+    cout << ((p & Permissions::others_read) != Permissions::none ? 'r' : '-');
+    cout << ((p & Permissions::others_write) != Permissions::none ? 'w' : '-');
+    cout << ((p & Permissions::others_exec) != Permissions::none ? 'x' : '-');
 }
 
 static Options parse_options(const vector<string>& tokens){

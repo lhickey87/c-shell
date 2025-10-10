@@ -12,6 +12,7 @@ class Executor {
         static std::vector<char*> to_argv(const std::vector<std::string>& args) {
             //given we are passing in a reference, what if in another function the memory is freed??
             std::vector<char*> argv;
+            //NEEDS TO BE CLEANED UP ASAP
             for (auto& arg : args) {
                 argv.push_back(const_cast<char*>(arg.c_str()));
             }
