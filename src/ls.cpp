@@ -1,12 +1,7 @@
-#include "builtins.h"
-#include <vector>
-#include <string>
-#include <filesystem>
-#include <iostream>
+#include "executables.h"
 
 
 using namespace std;
-namespace fs = std::filesystem;
 
 struct Options {
     string path = ".";
@@ -15,13 +10,11 @@ struct Options {
     bool pathExists = true;
 };
 
-using Permissions = std::filesystem::perms;
-using Path = fs::path;
-using DirEntry = fs::directory_entry;
+using Permissions = fs::perms;
 using DirectoryIter = fs::directory_iterator;
 
 static Options parse_options(const vector<string>& tokens);
-void long_format(const DirEntry& entry);
+void long_format(const DirectoryEntry& entry);
 void print_perms(Permissions perms);
 
 
@@ -33,7 +26,7 @@ void ls(const vector<string>& tokens) {
         return; 
     } 
 
-    const Path directory(lsoptions.path);
+    const FilePath directory(lsoptions.path);
 
     if (!fs::is_directory(directory)) {
         std::cout << lsoptions.path << "\n";
@@ -71,8 +64,8 @@ void ls(const vector<string>& tokens) {
 
 
 
-void long_format(const DirEntry& entry){
-    const Path p = entry.path();
+void long_format(const DirectoryEntry& entry){
+    const FilePath p = entry.path();
     try {
 
         fs::file_status status = fs::status(p);

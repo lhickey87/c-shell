@@ -14,6 +14,6 @@ void cd(const vector<string>& tokens){
         return;
     }
 
-    const fs::path& newPath(tokens[1]);
+    const FilePath& newPath(tokens[1]);
     fs::current_path(newPath);
 }

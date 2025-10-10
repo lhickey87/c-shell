@@ -1,19 +1,15 @@
-#include "builtins.h"
-#include <vector>
-#include <string>
-#include <filesystem>
-#include <iostream>
-
+#include "executables.h"
 #include <fstream>
 
 using namespace std;
-namespace fs = std::filesystem;
 
 struct Options {
     string inputFile;
     bool redirect = false;
     string writeFile;
 };
+using OutputStream = std::ostream;
+using OutputFile = std::ofstream;
 
 static Options handle_flags(const vector<string>& tokens);
 bool fileExists(const std::string& file);
@@ -27,9 +23,9 @@ void concat(const vector<string>& tokens){
         cerr << "Could not open file: "<< catOptions.inputFile << "\n";   
     } 
 
-    ostream* output_stream = &std::cout;
+    OutputStream* output_stream = &std::cout;
 
-    ofstream output_file; 
+    OutputFile output_file; 
 
     if (catOptions.redirect){
         output_file.open(catOptions.writeFile, ios::out | ios::trunc);
@@ -40,7 +36,7 @@ void concat(const vector<string>& tokens){
         }
         output_stream = &output_file;
     }
-    //now that we have outputstream decalred
+    
     string line;
     while (getline(inputFile, line)){
         (*output_stream) << line << "\n";
@@ -48,7 +44,7 @@ void concat(const vector<string>& tokens){
 }
 
 bool fileExists(const std::string& file){
-    const fs::path newPath(file);
+    const FilePath newPath(file);
     return fs::exists(newPath);
 }
 

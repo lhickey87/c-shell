@@ -16,7 +16,7 @@ void mkdir(const vector<string>& tokens){
     }
     
     const string& token = tokens[1];
-    const fs::path newPath(token);
+    const FilePath newPath(token);
     
     fs::create_directory(newPath);
 }

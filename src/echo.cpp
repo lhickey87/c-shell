@@ -1,13 +1,10 @@
-#include "builtins.h"
-#include <vector>
-#include <string>
-#include <filesystem>
-#include <iostream>
-
+#include "executables.h"
 #include <fstream>
 
 using namespace std;
-namespace fs = std::filesystem;
+
+using OutputStream = std::ostream;
+using OutputFile = std::ofstream;
 
 struct EchoOptions{
     bool redirect = false;
@@ -21,9 +18,9 @@ static EchoOptions handle_tokens(const vector<string>& tokens);
 void echo(const vector<string>& tokens){
     EchoOptions echo_options = handle_tokens(tokens);
 
-    ostream* file_stream = &std::cout;
+    OutputStream* file_stream = &std::cout;
     
-    std::ofstream output_file;
+    OutputFile output_file;
     if (echo_options.redirect){
         output_file.open(echo_options.redirect_file, ios::out | ios::trunc);
         

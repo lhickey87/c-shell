@@ -26,7 +26,7 @@ void rm(const vector<string>& tokens) {
     }
 
     for (const auto& path_str : opts.paths) {
-        fs::path p = path_str;
+        FilePath p = path_str;
         std::error_code ec;
 
         if (!fs::exists(p) && opts.f_flag) {
