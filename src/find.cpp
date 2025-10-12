@@ -50,7 +50,6 @@ void find(const vector<string>& tokens){
     vector<DirectoryEntry> matchingFiles = FindFiles(findOptions);
 
     for (const auto& file : matchingFiles){
-        cout << "inside matching loop \n";
         cout << fs::absolute(file.path()) << "\n"; 
     }
 

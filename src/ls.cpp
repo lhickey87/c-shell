@@ -1,6 +1,5 @@
 #include "executables.h"
 
-
 using namespace std;
 
 struct Options {

@@ -10,6 +10,12 @@ using std::string;
 using std::vector;
 
 
+struct Command {
+    string commandName;
+    vector<string> args;
+};
+using Commands = vector<Command>;
+
 class Executor {
 
     private:
@@ -46,20 +52,67 @@ class Executor {
             return 0;
         }
 
-        /*static int process_pipeline(const string& command_name, const vector<string>& args){
-            //are all pipes, write | read optional(write)
-            int num_commands = args.size();
+        static int process_pipeline(const string& path, const Commands& commands) {
+            int num_commands = commands.size();
+            int prev_pipe_read = -1;  // Track previous pipe's read end
             
-            for (int i = 0; i < num_commands; ++i){
-                int fd[2];
-                if (pipe(fd) == 1){
-                    std::cerr << "Issue opening pipe \n";
+            for (int i = 0; i < num_commands; ++i) {
+                int pipe_fds[2];
+                
+                if (i < num_commands - 1) {
+                    if (pipe(pipe_fds) == -1) {
+                        perror("pipe");
+                        return 1;
+                    }
+                }
+                
+                pid_t pid = fork();
+                
+                if (pid == -1) {
+                    perror("fork");
                     return 1;
                 }
+                
+                if (pid == 0) {  // Child process
+                    if (prev_pipe_read != -1) {
+                        dup2(prev_pipe_read, STDIN_FILENO);
+                        close(prev_pipe_read);
+                    }
+                    
+                    if (i < num_commands - 1) {
+                        dup2(pipe_fds[1], STDOUT_FILENO);
+                        close(pipe_fds[1]);
+                        close(pipe_fds[0]);
+                    }
+                    
+                    string command_path = path + "/src/" + commands[i].commandName;
+                    auto argv = to_argv(commands[i].args);
+                    
+                    execv(command_path.c_str(), argv.data());
+                    perror("execv");
+                    exit(1);
+                }
+                
+                // parent process
+                // close previous pipe's read end (done with it)
+                if (prev_pipe_read != -1) {
+                    close(prev_pipe_read);
+                }
+                
+                // close current pipe's write end and save read end for next iteration
+                if (i < num_commands - 1) {
+                    close(pipe_fds[1]);
+                    prev_pipe_read = pipe_fds[0];
+                }
             }
-        } */
+            
+            // Wait for all children
+            for (int i = 0; i < num_commands; ++i) {
+                wait(nullptr);
+            }
+            
+            return 0;
+        } 
 };
-
-
 
 #endif
