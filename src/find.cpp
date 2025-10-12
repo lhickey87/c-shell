@@ -17,10 +17,6 @@ struct Options {
     optional<regex> nameMatch;
     optional<FilePath> filePath;
 };
-//should we use templating
-//template<T>
-//function(T&& ... v){} this way it handles many options of different types
-//then based on type we would know how to check all vars
 
 using FlagHandler = function<void(Options&, TokenIterator&, const TokenIterator&)>;
 
