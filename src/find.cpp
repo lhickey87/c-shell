@@ -19,21 +19,13 @@ struct Options {
 };
 
 using FlagHandler = function<void(Options&, TokenIterator&, const TokenIterator&)>;
-
 using RecursiveDirIter = fs::recursive_directory_iterator;
-
 Options handleTokens(const vector<string>& tokens);
-
 void handleName(Options& options, TokenIterator& it, const TokenIterator& end);
-
 void handleSize(Options& options, TokenIterator& it, const TokenIterator& end);
-
 void handleType(Options& options, TokenIterator& it, const TokenIterator& end);
-
 void handleMaxDepth(Options& options, TokenIterator& it, const TokenIterator& end);
-
 bool FileMatches(const DirectoryEntry& dirEntry, const Options& options);
-
 //this will be a hard function to implement
 //could use std::copy_if but the issue is which predicate do we use
 vector<DirectoryEntry> FindFiles(const Options& options);
@@ -64,6 +56,7 @@ Options handleTokens(const vector<string>& tokens){
     auto it = tokens.begin();
     auto end = tokens.end();
 
+    //could likley use range based for to be more concise
     while (it != end){
         const string& token = *it; //dereferncing to get token string value
 
@@ -71,7 +64,7 @@ Options handleTokens(const vector<string>& tokens){
             ++it;
             continue; 
         }
-        //find what flag was passed
+
         auto handler = flag_handlers.find(token);
         if (handler != flag_handlers.end()){
             handler->second(findOptions, it, end);
@@ -95,7 +88,7 @@ void handleName(Options& options, TokenIterator& it, const TokenIterator& end) {
 }
 
 void handleType(Options& options, TokenIterator& it, const TokenIterator& end) {
-    ++it;
+    ++it; //*it will be a string 
     if (it != end) {
         char type_char = (*it)[0];
         switch (type_char) {
@@ -139,14 +132,12 @@ vector<DirectoryEntry> FindFiles(const Options& options) {
             }
         }
         
-        // Check file type
         if (options.type) {
             if (entry.status().type() != *options.type) {
                 continue;
             }
         }
         
-        // Check size
         if (options.fileSize) {
             if (entry.file_size() != *options.fileSize) {
                 continue;

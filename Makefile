@@ -8,7 +8,7 @@ SHELL_OBJS = $(SHELL_SRC:.cpp=.o)
 # Find all .cpp files in src/
 ALL_SRC = $(wildcard src/*.cpp)
 
-BUILTIN_SRCS = src/mkdir.cpp src/cd.cpp src/rm.cpp src/grep.cpp
+BUILTIN_SRCS = src/mkdir.cpp src/cd.cpp src/rm.cpp 
 
 PIPE_SRCS = $(filter-out $(BUILTIN_SRCS), $(ALL_SRC))
 
