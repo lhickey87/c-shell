@@ -20,9 +20,9 @@ class Executor {
 
     private:
         static vector<char*> to_argv(const vector<string>& args) {
-            //given we are passing in a reference, what if in another function the memory is freed??
+
             vector<char*> argv;
-            //NEEDS TO BE CLEANED UP ASAP
+
             for (auto& arg : args) {
                 argv.push_back(const_cast<char*>(arg.c_str()));
             }
@@ -93,20 +93,17 @@ class Executor {
                     exit(1);
                 }
                 
-                // parent process
-                // close previous pipe's read end (done with it)
                 if (prev_pipe_read != -1) {
                     close(prev_pipe_read);
                 }
                 
-                // close current pipe's write end and save read end for next iteration
                 if (i < num_commands - 1) {
                     close(pipe_fds[1]);
                     prev_pipe_read = pipe_fds[0];
                 }
             }
             
-            // Wait for all children
+
             for (int i = 0; i < num_commands; ++i) {
                 wait(nullptr);
             }

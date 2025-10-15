@@ -81,7 +81,7 @@ void long_format(const DirectoryEntry& entry){
         
     }
 }
-
+    
 void print_perms(Permissions p) {
     cout << ((p & Permissions::owner_read) != Permissions::none ? 'r' : '-');
     cout << ((p & Permissions::owner_write) != Permissions::none ? 'w' : '-');

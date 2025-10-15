@@ -1,138 +1,95 @@
 #include "executables.h"
-#include <regex>
-#include <map>
 #include <algorithm>
-#include <regex>
 #include <fstream>
 #include <glob.h>
-
-
+#include "grepConfig.h"
 using namespace std;
 
-struct Options {
-    const char* fileGlob;
-    regex pattern;
-    vector<FilePath> globFiles; 
-    vector<string> lines;
-    int lineCount = 0;
-    FilePath dirPath = FilePath(".");
-};
 
-using FlagHandler = std::function<void(Options&, TokenIterator&, const TokenIterator&)>;
-Options handleTokens(const vector<string>& tokens);
-using FlagHandler = std::function<void(Options&, TokenIterator&, const TokenIterator&)>;
-void getMatchingFiles(Options& options, TokenIterator& it, const TokenIterator& end);
-void getMatchingLines(Options& options, TokenIterator& it, const TokenIterator& end);
-void searchFile(Options& options, const FilePath& filePath);
-
-const map<string,FlagHandler> flag_handlers = {
-    {"-l", getMatchingFiles},
-    {"-m", getMatchingLines}
-};
-
-void grep(const vector<string>& tokens){
-    Options opts = handleTokens(tokens);
-
-    for (const auto& line : opts.lines){
-        cout << line << "\n";
-    }
-}
-
-Options handleTokens(const vector<string>& tokens){
-    Options opts {};
-
-    auto end = tokens.end();
-
-    auto it = tokens.begin();
+Options handleTokens(const vector<string>& tokens) {
+    Options opts;
+    size_t i = 1;
     
-    while (it != end){
-
-        const string& token = *it; //dereferncing to get token string value
-
-        if (token == "grep"){
-            ++it;
-            continue; 
-        }
-
-        auto handler = flag_handlers.find(token);
-
-        if (handler != flag_handlers.end()){
-
-            handler->second(opts, it, end);
-        }
-        ++it;
+    while (i < tokens.size() && tokens[i][0] == '-') {
+        if (tokens[i] == "-c") opts.showCountOnly = true;
+        else if (tokens[i] == "-l" && ++i < tokens.size()) opts.fileGlobArg = tokens[i];
+        i++;
     }
-
+    
+    if (i < tokens.size()) opts.patternArg = tokens[i++];
+    
+    if (opts.fileGlobArg.empty() && i < tokens.size()) {
+        opts.fileGlobArg = tokens[i];
+    }
+    
     return opts;
 }
 
-void getMatchingFiles(Options& options, TokenIterator& it, const TokenIterator& end){
-    ++it;
-    if (it != end){
-        options.fileGlob = (*it).c_str(); 
-    }
+void findMatchingFiles(Options& opts) {
+    glob_t glob_result;
+    memset(&glob_result, 0, sizeof(glob_t));
 
-    glob_t globStruct;
-
-    std::memset(&globStruct,0,sizeof(glob_t));
-
-    int returnVal = glob(options.fileGlob, 0, nullptr, &globStruct);
-
-    if (returnVal != 0) {
-        if (returnVal != GLOB_NOMATCH) {
-            globfree(&globStruct);
-            cerr << "glob() failed \n";
+    int globSuccess = glob(opts.fileGlobArg.c_str(), 0, nullptr, &glob_result);
+    
+    if (globSuccess == 0) {
+        for (size_t i = 0; i < glob_result.gl_pathc; ++i) {
+            opts.globFiles.emplace_back(glob_result.gl_pathv[i]);
         }
     }
-
-    for (size_t i =0; i < globStruct.gl_pathc; ++i){
-        FilePath matchingFile = FilePath(globStruct.gl_pathv[i]);
-        options.globFiles.push_back(matchingFile);
-    }
-
-    globfree(&globStruct);
+    
+    globfree(&glob_result);
 }
 
-void getMatchingLines(Options& options, TokenIterator& it, const TokenIterator& end){
-    ++it;
-    if (it != end){
-        options.pattern = regex(*it);
-    } else {
-        cerr << "end of iterator \n";
-        return;
-    }
-
-    for (const auto& file : options.globFiles){
-        searchFile(options, file);
-    }
-}
-
-
-void searchFile(Options& options, const FilePath& filePath){
-    ifstream inputFile(filePath); 
-
-    string fileString = filePath.filename().string();
-
-    if (!inputFile.is_open()){
-        cerr << "issue opening file" << filePath.filename().string() << "\n";
-        return;
-    }
-
+void searchFile(Options& opts, const FilePath& path) {
+    ifstream file(path);
+    if (!file) return;
+    
+    string filename = path.filename().string();
     string line;
-    while (getline(inputFile,line)){
-        if (regex_search(line, options.pattern)){
-            options.lineCount++; //adding 1 for each line matchged
-            options.lines.push_back(fileString+":"+line);
+    
+    while (getline(file, line)) {
+        if (regex_search(line, opts.pattern)) {
+            opts.lineCount++;
+            opts.lines.push_back(filename + ":" + line);
         }
     }
 }
 
+void searchAllFiles(Options& opts) {
+    try {
+        opts.pattern = regex(opts.patternArg);
+    } catch (const regex_error&) {
+        cerr << "grep: invalid pattern\n";
+        return;
+    }
+    
+    for (const auto& file : opts.globFiles) {
+        searchFile(opts, file);
+    }
+}
 
-int main(int argc, char* argv[]){
 
-    vector<string> tokens(argv,argv+argc);
+void grep(const vector<string>& tokens) {
+    Options opts = handleTokens(tokens);
+    
+    if (opts.fileGlobArg.empty() || opts.patternArg.empty()) {
+        cerr << "Usage: grep [-c] pattern files\n";
+        return;
+    }
+    
+    findMatchingFiles(opts);
+    searchAllFiles(opts);
+    
+    if (opts.showCountOnly) {
+        cout << opts.lineCount << "\n";
+    } else {
+        for (const auto& line : opts.lines) {
+            cout << line << "\n";
+        }
+    }
+}
 
-    grep(tokens);
-
+int main(int argc, char* argv[]) {
+    grep(vector<string>(argv, argv + argc));
     return EXIT_SUCCESS;
 }
