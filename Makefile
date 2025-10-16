@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -Wextra -std=c++17 -g -Iinclude 
+CXXFLAGS = -Wall -Wextra -std=c++17 -Iinclude 
 
 SHELL_EXEC = myshell
 SHELL_SRC = main.cpp src/mkdir.cpp src/cd.cpp src/rm.cpp
@@ -8,8 +8,7 @@ SHELL_OBJS = $(SHELL_SRC:.cpp=.o)
 # Find all .cpp files in src/
 ALL_SRC = $(wildcard src/*.cpp)
 
-BUILTIN_SRCS = src/mkdir.cpp src/cd.cpp src/rm.cpp 
-
+BUILTIN_SRCS = src/mkdir.cpp src/cd.cpp src/rm.cpp src/backup.cpp
 PIPE_SRCS = $(filter-out $(BUILTIN_SRCS), $(ALL_SRC))
 
 # Define the names of the pipe executables (e.g., src/find, src/grep)

@@ -1,95 +1,193 @@
-#include "executables.h"
-#include <algorithm>
-#include <fstream>
+#include "grep.h"
 #include <glob.h>
-#include "grepConfig.h"
-using namespace std;
+#include <map>
+#include <fstream>
 
 
-Options handleTokens(const vector<string>& tokens) {
-    Options opts;
-    size_t i = 1;
-    
-    while (i < tokens.size() && tokens[i][0] == '-') {
-        if (tokens[i] == "-c") opts.showCountOnly = true;
-        else if (tokens[i] == "-l" && ++i < tokens.size()) opts.fileGlobArg = tokens[i];
-        i++;
-    }
-    
-    if (i < tokens.size()) opts.patternArg = tokens[i++];
-    
-    if (opts.fileGlobArg.empty() && i < tokens.size()) {
-        opts.fileGlobArg = tokens[i];
-    }
-    
-    return opts;
+void setCountOnly(Options& options){
+    options.countOnly = true;
+    options.format = Format::COUNT;
 }
 
-void findMatchingFiles(Options& opts) {
+void setNoFileName(Options& options){
+    options.noFileName = true;
+    options.format = Format::NOFILENAME;
+}
+
+void setRecursive(Options& options){
+    options.recursive = true;
+}
+
+void setFilesWithMatches(Options& options){
+    options.fileMatching = true;
+    options.format = Format::FILESMATCHING;
+}
+
+void recursiveFileSearch(Options& options){
+    auto dirIter = RecursiveDirIter(options.searchPath);
+    size_t numFiles = std::distance(dirIter, {});
+    //reserve memory for the number of files
+    options.globFiles.reserve(numFiles);
+    
+    for (const auto& entry : RecursiveDirIter(options.searchPath)){
+        if (!entry.path().has_extension()){ continue;}
+
+        //need to clean up dealing with executables
+        if (entry.path().extension() == ".o"){ continue;}
+
+        cout << "adding file: " << entry.path().string() << "\n";
+        options.globFiles.emplace_back(entry.path());
+    }
+}
+
+void findMatchingFiles(Options& options) {
     glob_t glob_result;
+
     memset(&glob_result, 0, sizeof(glob_t));
 
-    int globSuccess = glob(opts.fileGlobArg.c_str(), 0, nullptr, &glob_result);
-    
+    int globSuccess = glob(options.grepArgs[1].c_str(), 0, nullptr, &glob_result);
+     
+    options.globFiles.reserve(glob_result.gl_pathc);
+
     if (globSuccess == 0) {
         for (size_t i = 0; i < glob_result.gl_pathc; ++i) {
-            opts.globFiles.emplace_back(glob_result.gl_pathv[i]);
+            options.globFiles.emplace_back(glob_result.gl_pathv[i]);
         }
     }
     
     globfree(&glob_result);
 }
 
-void searchFile(Options& opts, const FilePath& path) {
-    ifstream file(path);
-    if (!file) return;
+Options handleArgs(vector<string>& tokens){
+    //grep -r pattern doesn't need fileArg
+    Options options {};
     
-    string filename = path.filename().string();
+    for (const auto& token : tokens){
+        if (token == "grep"){ continue;}
+
+        auto handler = flag_handlers.find(token);
+
+        if (handler != flag_handlers.end()){
+            cout << "inside handler for: " << token << "\n";
+            handler->second(options);
+        } else {
+            options.grepArgs.push_back(token);
+        }
+    }
+    cout << "supposed pattern: " << options.grepArgs[0] << "\n";
+    options.pattern = regex(options.grepArgs[0]);
+
+    if (options.recursive){
+        if (options.grepArgs.size() > 1){
+            options.searchPath = options.grepArgs[1]; //initializing filepath
+        } 
+        //globFiles is a vector
+        recursiveFileSearch(options);
+    } else { //if not recursive, if size == 1 -> stdin
+        if (options.grepArgs.size() == 1){
+            options.readStdIn = true;
+        } else { //not recursive and more than 1 grepArg, second arg will be fileGlob
+            findMatchingFiles(options); //need to get the matchingFiles
+        }
+    }
+
+    return options;
+}
+
+void matchingInput(Options& options, std::istream& inputStream){
     string line;
-    
-    while (getline(file, line)) {
-        if (regex_search(line, opts.pattern)) {
-            opts.lineCount++;
-            opts.lines.push_back(filename + ":" + line);
+    while (getline(inputStream,line)){
+        if (regex_search(line, options.pattern)){
+            options.lineCount++;
+            options.outputLines.emplace_back(line);
         }
     }
 }
 
-void searchAllFiles(Options& opts) {
-    try {
-        opts.pattern = regex(opts.patternArg);
-    } catch (const regex_error&) {
-        cerr << "grep: invalid pattern\n";
-        return;
-    }
-    
-    for (const auto& file : opts.globFiles) {
-        searchFile(opts, file);
+void matchingInput(Options& options, const FilePath& filePath){
+
+    std::ifstream fileStream(filePath);
+    if (!fileStream){ return;}
+
+    string filename = filePath.filename().string();
+
+    string line;
+
+    bool fileMatched = false;
+
+    while (getline(fileStream, line)){
+        if (regex_search(line, options.pattern)){
+            options.lineCount++;
+
+            options.outputLines.push_back(line);
+
+            if (!fileMatched){
+                options.filesMatching.push_back(filename);
+                fileMatched = true;
+            }
+            if (options.fileMatching){ return;}
+
+        }
     }
 }
 
+void printCount(Options& options){
+    cout << options.lineCount << "\n";
+}
 
-void grep(const vector<string>& tokens) {
-    Options opts = handleTokens(tokens);
-    
-    if (opts.fileGlobArg.empty() || opts.patternArg.empty()) {
-        cerr << "Usage: grep [-c] pattern files\n";
-        return;
+void printFiles(Options& options){
+    for (const auto& file : options.filesMatching){
+        cout << file << "\n";
     }
+}
+
+void printLine(Options& options){
+    for (const auto& line : options.outputLines){
+        cout << line << "\n";
+    }
+}
+//this will be called once we have dealt with all the outputs, i.e we have the fileNames and lines to output
+void format(Options& options){
+    //now we should have all the proper flags set    
+    switch (options.format){
+        case Format::COUNT:
+            printCount(options);
+            break;
+        case Format::FILESMATCHING:
+            printFiles(options);
+            break;
+        case Format::NOFILENAME:
+            printLine(options);
+            break;
+        default:
+            printLine(options);
+            break;
+    }
+}
+
+//method for opening files, this should be after globbing is done, that method probabl;y cannot be changed much
+void grep(Options& options){
     
-    findMatchingFiles(opts);
-    searchAllFiles(opts);
-    
-    if (opts.showCountOnly) {
-        cout << opts.lineCount << "\n";
+    if (options.readStdIn){
+        matchingInput(options, std::cin);
+    } else if (!options.globFiles.empty()) {
+        for (const auto& file : options.globFiles){
+            std::ifstream fileStream(file);
+            matchingInput(options, fileStream);
+        }
     } else {
-        for (const auto& line : opts.lines) {
-            cout << line << "\n";
-        }
+        cerr << "Error: no files or input specified \n";
     }
+    format(options); //this will call print functions for display
 }
 
-int main(int argc, char* argv[]) {
-    grep(vector<string>(argv, argv + argc));
+int main(int argc, const char* argv[]){
+    vector<string> tokens(argv,argv+argc);
+
+    Options options = handleArgs(tokens);
+
+    grep(options);
+
     return EXIT_SUCCESS;
 }
+
